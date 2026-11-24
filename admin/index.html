@@ -1,0 +1,20 @@
+<!doctype html><html lang="mn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#282d30"><title>Урлангийн удирдлага · Луут Торго</title><link rel="stylesheet" href="/admin/panel.css"><script src="/admin/panel.js" defer></script></head><body>
+<header><a class="brand" href="/"><img src="/assets/logo.svg" alt=""><span>ЛУУТ ТОРГО<small>Үндэсний хувцасны урлан</small></span></a><div class="actions"><a href="/" class="site-link">Сайт үзэх</a><button id="logout" class="subtle" hidden>Гарах</button></div></header>
+<main id="entry"><div class="entry-art"><img src="/assets/img9.svg" alt="Хөх торгон үндэсний хувцасны хийц"><span>Луут Торго <i>Урлан</i></span></div>
+<form id="loginForm" class="login"><p class="overline">УРЛАНГИЙН УДИРДЛАГА</p><h1>Тавтай морил.</h1><p class="muted">Админ эрхээрээ нэвтэрнэ үү.</p>
+<label>Нэвтрэх нэр<input name="user" autocomplete="username" maxlength="80" required></label>
+<label>Нууц үг<input name="password" autocomplete="current-password" type="password" maxlength="256" required></label>
+<button class="primary wide">Нэвтрэх</button><p id="loginError" role="status" class="error"></p></form></main>
+<main id="studio" hidden><div class="heading"><div><p class="overline">ЛУУТ ТОРГО / АДМИН</p><h1>Урлангийн удирдлага</h1></div><button id="newPost" class="primary">＋ Шинэ нийтлэл</button></div>
+<nav aria-label="Удирдлагын хэсгүүд" class="tabs"><button id="postTab" aria-current="page">Нийтлэл</button><button id="inboxTab">Ирсэн хүсэлт</button></nav>
+<section id="postSection"><div class="toolbar"><div class="segment" aria-label="Нийтлэлийн төлөв"><button id="live" aria-pressed="true">Нийтэлсэн</button><button id="archive" aria-pressed="false">Архив</button></div><label class="search"><span class="sr">Гарчгаар хайх</span><input id="search" type="search" placeholder="Гарчгаар хайх"></label></div>
+<p class="count" id="postCount"></p><div class="postlist" id="posts"></div></section>
+<section id="inboxSection" hidden><div class="toolbar"><label>Ирсэн огноо <input type="date" id="date"></label><button id="allDates" class="subtle">Бүх огноо</button><button id="refresh" class="subtle">Шинэчлэх</button></div><p class="count">Улаанбаатарын цагаар · Сүүлийн хүсэлт эхэнд</p><div id="inbox"></div><button class="subtle" id="more" hidden>Дараагийн хүсэлтүүд</button></section>
+<p id="feedback" role="status"></p></main>
+<dialog id="editor"><form id="postForm"><div class="dialog-head"><div><p class="overline">НИЙТЛЭЛ</p><h2 id="editorTitle">Шинэ нийтлэл</h2></div><button type="button" class="close" id="cancel" aria-label="Хаах">×</button></div>
+<div class="edit-grid"><div><label>Нийтлэлийн зураг<input id="file" type="file" accept="image/jpeg,image/png,image/webp"></label><p class="hint">JPG, PNG, WebP · 12 МБ хүртэл</p><img id="preview" alt="Сонгосон зургийн харагдац" hidden></div>
+<div class="fields"><label>Гарчиг<input name="title" maxlength="120" required></label><div class="pair"><label>Ангилал<select name="cat"><option value="clothing">Үндэсний хувцас</option><option value="fabric">Торго, материал</option><option value="embroidery">Хатгамал</option><option value="accessory">Гоёл чимэглэл</option><option value="campaign">Урам зориг · постер</option></select></label><label>Үнэ (₮)<input name="price" type="number" step="1" min="0" max="999999999999" placeholder="Үнэ лавлах"></label></div>
+<label>Товч тайлбар<textarea name="description" rows="2" maxlength="350"></textarea></label><label>Үндсэн текст<textarea name="body" rows="5" maxlength="6000"></textarea></label></div></div>
+<div class="dialog-foot"><span id="editError" class="error" role="status"></span><button type="button" class="subtle" id="back">Цуцлах</button><button id="save" class="primary">Нийтлэх</button></div></form></dialog>
+<dialog id="confirm"><div class="dialog-head"><h2>Нийтлэлийг архивлах уу?</h2></div><p id="confirmText"></p><div class="dialog-foot"><button class="subtle" id="keep">Цуцлах</button><button class="primary" id="confirmArchive">Архивлах</button></div></dialog>
+</body></html>
