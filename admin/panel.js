@@ -76,7 +76,7 @@ function showPosts(){
 }
 async function setArchive(p,value,b){
   b.disabled=true;
-  try{const r=await api('archive',{id:p.id,rev:p.rev,archived:value});posts=posts.map(x=>x.id===p.id?r.post:x);showPosts();notice(value?'Нийтлэлийг архивлалаа.':'Нийтлэлийг нүүр хуудсанд сэргээж нийтэллээ.');}
+  try{const r=await api('archive',{id:p.id,rev:p.rev,archived:value});postsVersion++;posts=posts.map(x=>x.id===p.id?r.post:x);showPosts();notice(value?'Нийтлэлийг архивлалаа.':'Нийтлэлийг нүүр хуудсанд сэргээж нийтэллээ.');}
   catch(err){notice(err.message);if(err.status===409)await loadPosts().catch(e=>notice(e.message));}
   finally{b.disabled=false;if($('confirm').open)$('confirm').close();}
 }
@@ -119,7 +119,7 @@ $('postForm').onsubmit=async e=>{
     const file=$('file').files[0];
     const values=Object.fromEntries(new FormData(f));
     const {post}=await api('save',{...values,price:values.price===''?null:Number(values.price),image:file?await compress(file):null,id:editing.id,rev:editing.rev});
-    posts=editing.rev?posts.map(x=>x.id===post.id?post:x):[post,...posts];archived=post.archived;$('search').value='';
+    postsVersion++;posts=editing.rev?posts.map(x=>x.id===post.id?post:x):[post,...posts];archived=post.archived;$('search').value='';
     $('editor').close();showPosts();notice(post.archived?'Архивласан нийтлэлийн өөрчлөлтийг хадгаллаа.':'Нийтлэлийг нүүр хуудсанд хадгаллаа.');
   }catch(err){$('editError').textContent=err.message;if(err.status===409)await loadPosts().catch(e=>notice(e.message));}
   finally{b.disabled=false;}

@@ -24,7 +24,9 @@ function equal(a, b) {
 }
 function collision(e) { return /PreconditionFailed|already exists|precondition failed/i.test(e.constructor.name + ' ' + e.message); }
 async function read(path, fallback = null) {
-  const r = await get(path, { access: 'private', useCache: false });
+  // A compressed JSON response carries a weak HTTP validator. Blob conditional
+  // writes require the strong ETag of the exact representation we just read.
+  const r = await get(path, { access: 'private', useCache: false, headers: { 'Accept-Encoding': 'identity' } });
   return r ? { data: await new Response(r.stream).json(), etag: r.blob.etag } : { data: fallback, etag: null };
 }
 async function write(path, value, etag, extra = {}) {
@@ -68,9 +70,11 @@ async function uploadedImage(data) {
   return '/api/cms?action=image&key=' + key;
 }
 async function changePost(b) {
-  const { data: posts, etag } = await read(catalogPath, seed);
+  const snapshot = await read(catalogPath, seed);
+  const posts = snapshot.data;
   const idx = posts.findIndex(p => p.id === b.id), old = posts[idx];
   if (!old && (!uuid.test(b.id) || b.rev !== 0)) fail(400, 'Нийтлэлийн дугаар буруу байна.');
+  if (b.action === 'archive' && old && old.archived === b.archived) return { ok: true, post: old };
   if (old && b.rev !== old.rev) fail(409, conflictText);
   let post;
   if (b.action === 'archive') {
@@ -84,10 +88,24 @@ async function changePost(b) {
   }
   post.rev = (old?.rev || 0) + 1;
   post.updated = new Date().toISOString();
-  const next = [...posts];
-  if (old) next[idx] = post; else next.unshift(post);
-  try { await write(catalogPath, next, etag); } catch (e) { if (collision(e)) fail(409, conflictText); throw e; }
-  return { ok: true, post };
+  let current = snapshot;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const index = current.data.findIndex(row => row.id === b.id);
+    const latest = current.data[index];
+    if (b.action === 'archive' && latest?.archived === b.archived) return { ok: true, post: latest };
+    if ((latest?.rev ?? 0) !== b.rev) fail(409, conflictText);
+    const next = [...current.data];
+    if (latest) next[index] = post;
+    else next.unshift(post);
+    try {
+      await write(catalogPath, next, current.etag);
+      return { ok: true, post };
+    } catch (error) {
+      if (!collision(error)) throw error;
+      current = await read(catalogPath, seed);
+    }
+  }
+  fail(409, 'Каталогт зэрэг хэд хэдэн өөрчлөлт орлоо. Дахин оролдоно уу.');
 }
 function datePrefix(date) {
   return String(99999999 - Number(date.replaceAll('-', ''))).padStart(8,'0');
