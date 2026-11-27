@@ -54,7 +54,15 @@ function tab(inbox) {
   if(inbox)loadInbox();else showPosts();
 }
 $('postTab').onclick=()=>{tab(false);loadPosts().catch(e=>notice(e.message));};$('inboxTab').onclick=()=>tab(true);
+function updateKpis(){
+  const live=posts.filter(p=>!p.archived).length;
+  const archivedCount=posts.filter(p=>p.archived).length;
+  if($('kpiLive'))$('kpiLive').textContent=String(live);
+  if($('kpiArchive'))$('kpiArchive').textContent=String(archivedCount);
+  if($('kpiTotal'))$('kpiTotal').textContent=String(posts.length);
+}
 function showPosts(){
+  updateKpis();
   const list=$('posts');list.replaceChildren();
   $('live').textContent='Нийтэлсэн · '+posts.filter(p=>!p.archived).length;
   $('archive').textContent='Архив · '+posts.filter(p=>p.archived).length;
