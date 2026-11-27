@@ -83,12 +83,35 @@ function showPosts(){
   }
 }
 async function setArchive(p,value,b){
+  if(b.disabled)return;
   b.disabled=true;
-  try{const r=await api('archive',{id:p.id,rev:p.rev,archived:value});postsVersion++;posts=posts.map(x=>x.id===p.id?r.post:x);showPosts();notice(value?'Нийтлэлийг архивлалаа.':'Нийтлэлийг нүүр хуудсанд сэргээж нийтэллээ.');}
-  catch(err){notice(err.message);if(err.status===409)await loadPosts().catch(e=>notice(e.message));}
-  finally{b.disabled=false;if($('confirm').open)$('confirm').close();}
+  try{
+    let current=p, result=null;
+    for(let attempt=0;attempt<2;attempt++){
+      try{result=await api('archive',{id:current.id,rev:current.rev,archived:value});break;}
+      catch(err){
+        if(err.status!==409||attempt!==0)throw err;
+        await loadPosts();
+        current=posts.find(item=>item.id===p.id);
+        if(!current)throw Error('Нийтлэл олдсонгүй. Жагсаалтыг шинэчлэн шалгана уу.');
+        if(current.archived===value){result={post:current};break;}
+      }
+    }
+    postsVersion++;
+    posts=posts.map(item=>item.id===p.id?result.post:item);
+    showPosts();
+    notice(value?'Нийтлэлийг архивлалаа.':'Нийтлэлийг нүүр хуудсанд сэргээж нийтэллээ.');
+  }catch(err){
+    notice(err.message);
+    await loadPosts().catch(()=>{});
+  }finally{
+    b.disabled=false;
+    if($('confirm').open)$('confirm').close();
+    pending=null;
+  }
 }
 $('confirmArchive').onclick=e=>setArchive(pending,true,e.currentTarget);$('keep').onclick=()=>$('confirm').close();
+$('refreshPosts').onclick=()=>loadPosts().then(()=>notice('Жагсаалтыг шинэчиллээ.')).catch(e=>notice(e.message));
 $('live').onclick=()=>{archived=false;showPosts();};$('archive').onclick=()=>{archived=true;showPosts();};$('search').oninput=showPosts;
 function releasePreview(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';}
 function closeEditor(){if(!$('save').disabled)$('editor').close();}
